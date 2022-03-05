@@ -42,7 +42,7 @@ contract StakeLPToken is AccessControl {
         mLpToken = IERC20(_lpTokenAddr);
         mRewardToken = IERC20(_rewardTokenAddr);
 
-        mMinStakeTime = 10 seconds;
+        mMinStakeTime = 1 minutes;
         mPercent = 2; //2% за минуту
 
         // роль админа
@@ -57,7 +57,7 @@ contract StakeLPToken is AccessControl {
         curBalance.stakeTime = block.timestamp; //а время перезаписываем для простоты
         mBalance[msg.sender] = curBalance;
         
-        console.log("stake.  curBalance.stakeTime:", curBalance.stakeTime);
+        //console.log("stake.  curBalance.stakeTime:", curBalance.stakeTime);
 
         //передаем ЛП токены c пользователя на этот контракт
         mLpToken.transferFrom(msg.sender, address(this), _amount);
@@ -70,6 +70,7 @@ contract StakeLPToken is AccessControl {
 
         //время для начала расчета вознаграждения (если ранее уже запрашивали)
         uint256 clameTimeStart;
+        console.log("claim. curBalance.clameTime:", curBalance.clameTime);
         if (curBalance.clameTime != 0) {
             clameTimeStart = curBalance.clameTime;
         } else {
@@ -92,12 +93,15 @@ contract StakeLPToken is AccessControl {
 
     // unstake() - списывает с контракта стейкинга ЛП токены доступные для вывода
     function unstake() public {
+        
+        //claim(); //выдаем награду - не вызываем, т.к. если награды не будет, сработает require и отменит транзакцию
+
         Balance memory curBalance = mBalance[msg.sender];
         uint256 balanceToUnstake = curBalance.amount;
         require(balanceToUnstake > 0, "No LP tokens.");
 
         //Вывести застейканные ЛП токены также можно после определенного времени
-        console.log("unstake.  block.timestamp:", block.timestamp);
+        //console.log("unstake.  block.timestamp:", block.timestamp);
         require(
             curBalance.stakeTime + mMinStakeTime < block.timestamp,
             "Wait more time."
