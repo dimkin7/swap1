@@ -1,29 +1,25 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 import { ethers } from "hardhat";
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+  //деплой
+  const [deployer] = await ethers.getSigners();
+  console.log("Deploying contracts with the account:", deployer.address);
+  console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  const factory = await ethers.getContractFactory("StakeLPToken");
 
-  await greeter.deployed();
+  const dimaToken = "0xa2aaE6F6cBd2D7A8F465eF194f5812d8FbF6899b";
+  const uni_V2 = "0xE41945b3008a3Ea0272bDD4C52B2F5Af55eE1b41";
+  const admin = deployer.address; //0x7EA751f8B46E08F7397904A39b3e08901B5D1659
 
-  console.log("Greeter deployed to:", greeter.address);
+  //constructor(address _lpTokenAddr, address _rewardTokenAddr, address _admin) {
+  const contract = await factory.deploy(uni_V2, dimaToken, admin);
+  await contract.deployed();
+  console.log("Contract deployed to:", contract.address);
+  //Contract deployed to: 0xC55D91Cc3A1a574bd66A890Ea9f9477eD5dC7d7d
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
+//запуск
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
